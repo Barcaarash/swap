@@ -1,0 +1,174 @@
+/* Custom styles for Hot Swap Bot */
+
+/* Add additional gray shade for three-tone cards */
+.bg-gray-750 {
+  background-color: #2d3748;
+}
+
+/* Status badge colors */
+.wallet-status-badge {
+  background-color: #4a5568;
+  color: #e2e8f0;
+}
+
+.wallet-status-badge.active {
+  background-color: #38a169;
+  color: #f0fff4;
+}
+
+.wallet-status-badge.error {
+  background-color: #e53e3e;
+  color: #fff5f5;
+}
+
+/* Strategy badge colors */
+.wallet-strategy-badge.mixed {
+  background-color: #805ad5;
+  color: #faf5ff;
+}
+
+.wallet-strategy-badge.buy {
+  background-color: #3182ce;
+  color: #ebf8ff;
+}
+
+.wallet-strategy-badge.sell {
+  background-color: #d69e2e;
+  color: #fffff0;
+}
+
+/* Animate wallet cards on loading/refreshing */
+.wallet-card {
+  transition: all 0.3s ease;
+}
+
+.wallet-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.wallet-card.updating {
+  border: 1px solid #38a169;
+}
+
+/* Toast notifications */
+.toast {
+  min-width: 300px;
+  max-width: 450px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease, fadeOut 0.5s ease 3.5s forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast.success {
+  background-color: #38a169;
+  color: white;
+}
+
+.toast.error {
+  background-color: #e53e3e;
+  color: white;
+}
+
+.toast.info {
+  background-color: #3182ce;
+  color: white;
+}
+
+.toast.warning {
+  background-color: #d69e2e;
+  color: white;
+}
+
+.toast .toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.7);
+  animation: progressShrink 4s linear forwards;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes progressShrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Pulse animation for active wallets */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(56, 161, 105, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(56, 161, 105, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(56, 161, 105, 0);
+  }
+}
+
+.wallet-card.active {
+  animation: pulse 2s infinite;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button Hover Effects */
+.button-hover-effect:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Truncation for long addresses */
+.truncate-address {
+  display: inline-block;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} 

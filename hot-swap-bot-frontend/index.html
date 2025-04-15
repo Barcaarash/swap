@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hot Swap Bot</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+  <!-- Header -->
+  <header class="bg-gray-800 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <h1 class="text-2xl font-bold text-green-400">
+          <i class="fas fa-robot mr-2"></i> Hot Swap Bot
+        </h1>
+      </div>
+      <div>
+        <button id="addWalletBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow transition">
+          <i class="fas fa-plus mr-1"></i> Add Wallet
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-6">
+    <!-- Dashboard Stats -->
+    <div class="bg-gray-800 rounded-lg shadow-lg p-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-gray-700 rounded-md p-4">
+          <h3 class="text-gray-400 mb-1 text-sm">Active Wallets</h3>
+          <p class="text-2xl font-bold text-green-400" id="activeWalletsCount">0</p>
+        </div>
+        <div class="bg-gray-700 rounded-md p-4">
+          <h3 class="text-gray-400 mb-1 text-sm">Total Transactions</h3>
+          <p class="text-2xl font-bold text-green-400" id="totalTransactions">0</p>
+        </div>
+        <div class="bg-gray-700 rounded-md p-4">
+          <h3 class="text-gray-400 mb-1 text-sm">Last Update</h3>
+          <p class="text-md font-medium text-green-400" id="lastUpdate">-</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wallets Container -->
+    <div id="walletsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Wallet cards will be added here dynamically -->
+      <div class="flex items-center justify-center col-span-full py-12 text-gray-500" id="noWalletsMessage">
+        <div class="text-center">
+          <i class="fas fa-wallet text-5xl mb-4"></i>
+          <h3 class="text-xl font-medium">No wallets added yet</h3>
+          <p class="mt-2">Click "Add Wallet" to get started</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add Wallet Modal -->
+  <div id="addWalletModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-green-400">Add New Wallet</h3>
+        <button id="closeAddWalletModal" class="text-gray-400 hover:text-gray-200">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="addWalletForm">
+        <div class="mb-4">
+          <label class="block text-gray-400 mb-2" for="walletName">Wallet Name (Optional)</label>
+          <input type="text" id="walletName" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="My Trading Wallet">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-400 mb-2" for="privateKey">Private Key</label>
+          <input type="password" id="privateKey" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter wallet private key" required>
+          <p class="mt-1 text-xs text-gray-500">Your private key is encrypted and never sent to the frontend.</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-400 mb-2" for="tokenAddress">Token Address</label>
+          <input type="text" id="tokenAddress" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0x..." required>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-400 mb-2" for="strategy">Trading Strategy</label>
+          <select id="strategy" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="mixed">Mixed (Alternating Buy/Sell)</option>
+            <option value="buy">Buy Only</option>
+            <option value="sell">Sell Only</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-400 mb-2" for="buyAmount">Buy Amount (BNB)</label>
+            <input type="number" id="buyAmount" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0.01" step="0.01" min="0.001" value="0.01">
+          </div>
+          <div>
+            <label class="block text-gray-400 mb-2" for="sellPercentage">Sell Percentage</label>
+            <input type="number" id="sellPercentage" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="100" min="1" max="100" value="100">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-400 mb-2" for="slippageTolerance">Slippage (%)</label>
+            <input type="number" id="slippageTolerance" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0.5" step="0.1" min="0.1" value="0.5">
+          </div>
+          <div>
+            <label class="block text-gray-400 mb-2" for="interval">Interval (seconds)</label>
+            <input type="number" id="interval" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="60" min="10" value="60">
+          </div>
+        </div>
+        <div class="flex justify-end mt-6">
+          <button type="button" id="cancelAddWallet" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md shadow mr-2">Cancel</button>
+          <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow">Add Wallet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Wallet Modal -->
+  <div id="editWalletModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-green-400">Edit Wallet</h3>
+        <button id="closeEditWalletModal" class="text-gray-400 hover:text-gray-200">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="editWalletForm">
+        <input type="hidden" id="editWalletId">
+        <div class="mb-4">
+          <label class="block text-gray-400 mb-2" for="editWalletName">Wallet Name</label>
+          <input type="text" id="editWalletName" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="My Trading Wallet">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-400 mb-2" for="editTokenAddress">Token Address</label>
+          <input type="text" id="editTokenAddress" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0x..." required>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-400 mb-2" for="editStrategy">Trading Strategy</label>
+          <select id="editStrategy" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="mixed">Mixed (Alternating Buy/Sell)</option>
+            <option value="buy">Buy Only</option>
+            <option value="sell">Sell Only</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-400 mb-2" for="editBuyAmount">Buy Amount (BNB)</label>
+            <input type="number" id="editBuyAmount" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0.01" step="0.01" min="0.001">
+          </div>
+          <div>
+            <label class="block text-gray-400 mb-2" for="editSellPercentage">Sell Percentage</label>
+            <input type="number" id="editSellPercentage" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="100" min="1" max="100">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-gray-400 mb-2" for="editSlippageTolerance">Slippage (%)</label>
+            <input type="number" id="editSlippageTolerance" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0.5" step="0.1" min="0.1">
+          </div>
+          <div>
+            <label class="block text-gray-400 mb-2" for="editInterval">Interval (seconds)</label>
+            <input type="number" id="editInterval" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="60" min="10">
+          </div>
+        </div>
+        <div class="flex justify-end mt-6">
+          <button type="button" id="cancelEditWallet" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md shadow mr-2">Cancel</button>
+          <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow">Update Wallet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+      <div class="mb-4">
+        <h3 class="text-xl font-bold text-yellow-500 mb-2">Confirm Action</h3>
+        <p id="confirmationMessage" class="text-gray-300">Are you sure you want to proceed?</p>
+      </div>
+      <div class="flex justify-end mt-6">
+        <button id="cancelConfirmation" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md shadow mr-2">Cancel</button>
+        <button id="confirmAction" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50"></div>
+
+  <!-- Wallet Card Template -->
+  <template id="walletCardTemplate">
+    <div class="wallet-card bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+      <div class="p-4 border-b border-gray-700">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="wallet-name text-lg font-medium text-green-400 truncate mb-1">Wallet Name</h3>
+            <p class="wallet-address text-xs text-gray-400 font-mono truncate">0x0000...0000</p>
+          </div>
+          <div class="flex">
+            <button class="edit-wallet-btn text-gray-400 hover:text-yellow-500 mr-2" title="Edit Wallet">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="delete-wallet-btn text-gray-400 hover:text-red-500" title="Delete Wallet">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="mt-2 flex items-center">
+          <span class="wallet-status-badge inline-block px-2 py-1 rounded-full text-xs font-semibold mr-2">Idle</span>
+          <span class="wallet-strategy-badge inline-block px-2 py-1 rounded-full text-xs font-semibold">Mixed</span>
+        </div>
+      </div>
+      
+      <div class="p-4 bg-gray-750">
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <p class="text-xs text-gray-400 mb-1">BNB Balance</p>
+            <p class="bnb-balance text-md font-medium">0.0000 BNB</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-1">Token Balance</p>
+            <p class="token-balance text-md font-medium">0.0000</p>
+          </div>
+        </div>
+        <div class="mb-3">
+          <p class="text-xs text-gray-400 mb-1">Token Price</p>
+          <div class="flex items-center">
+            <p class="token-price text-md font-medium mr-2">$0.0000</p>
+            <span class="token-price-source text-xs text-gray-500">(Source: -)</span>
+          </div>
+        </div>
+        <div class="error-container bg-red-900 bg-opacity-30 border border-red-800 rounded-md p-2 mb-3 hidden">
+          <p class="text-xs text-red-400 font-medium">Error:</p>
+          <p class="error-message text-xs text-red-300"></p>
+        </div>
+        <div class="flex justify-between mt-2">
+          <div>
+            <span class="text-xs text-gray-400 last-action-label">Last Action:</span>
+            <span class="text-xs text-gray-300 last-action">None</span>
+          </div>
+          <div>
+            <span class="text-xs text-gray-400">Updated:</span>
+            <span class="text-xs text-gray-300 last-update">Just now</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-4 bg-gray-750 border-t border-gray-700 flex space-x-2">
+        <button class="start-trading-btn bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm flex-1">
+          <i class="fas fa-play mr-1"></i> Start
+        </button>
+        <button class="stop-trading-btn bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex-1 hidden">
+          <i class="fas fa-stop mr-1"></i> Stop
+        </button>
+        <button class="buy-now-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm flex-1">
+          <i class="fas fa-arrow-down mr-1"></i> Buy
+        </button>
+        <button class="sell-now-btn bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm flex-1">
+          <i class="fas fa-arrow-up mr-1"></i> Sell
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/wallets.js"></script>
+  <script src="js/trading.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html> 
